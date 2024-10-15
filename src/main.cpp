@@ -1,5 +1,7 @@
 #include <Arduino.h>
 #include <PubSubClient.h>
+#include <IMU9250.h>
+#include <SPI.h>
 #include <WiFi.h>
 
 const char* ssid = "Tufts_Robot";
@@ -44,10 +46,12 @@ void setup() {
     client.subscribe("inTopic");
     Serial.println("SUCCESSFUL");
   }
+  IMU9250_Setup();
   Serial.println("setup over");
 }
 
 void loop()
 {
-  client.loop();
+    IMU9250_loop();
+    client.loop();
 }
