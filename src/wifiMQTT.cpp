@@ -67,6 +67,12 @@ void MQTTSetup() {
     }
 }
 
+void sendIntegralSum() {
+    char floatString[10];
+    dtostrf(GetErrorSum(), 6, 2, floatString);
+    client.publish("ErrorSum", &floatString[0]);
+}
+
 void MQTTLoop() {
     client.loop();
 }

@@ -15,6 +15,7 @@ def handle_connect(client, userdata, flags, reason_code, properties=None):
     print(f"Connected with reason code: {reason_code}")
     client.subscribe("StartUp")
     client.subscribe("Gains")
+    client.subscribe("ErrorSum")
 
 # Callback when a message is received from the broker
 def on_message(client, userdata, msg):
