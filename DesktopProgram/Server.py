@@ -1,38 +1,48 @@
-import logging
-import asyncio
-from hbmqtt.broker import Broker
+import paho.mqtt.client as mqtt
+import json
 
-logger = logging.getLogger(__name__)
+# Define the MQTT settings
+BROKER = "127.0.0.1"  # Public MQTT broker for testing
+PORT = 1883  # Standard port for unencrypted MQTT
 
-config = {
-    'listeners': {
-        'default': {
-            'type': 'tcp',
-            'bind': '0.0.0.0:1883',  # Standard MQTT listener
-        },
-        'ws-mqtt': {
-            'type': 'ws',
-            'bind': '127.0.0.1:8080',  # WebSocket listener on localhost:8080
-            'max_connections': 10,
-        },
-    },
-    'sys_interval': 10,
-    # Removed 'auth' section for no authentication
-    'topic-check': {
-        'enabled': False  # Disable topic validation
-    }
-}
-
-broker = Broker(config)
+STARTING_GAINS = {  "k_p" : 0.5,
+                    "k_i" : 0,
+                    "k_d" : 0 }
 
 
-async def start_broker():
-    await broker.start()
+# Define the callback when the client connects to the broker
+def handle_connect(client, userdata, flags, reason_code, properties=None):
+    print(f"Connected with reason code: {reason_code}")
+    client.subscribe("StartUp")
+    client.subscribe("Gains")
 
+# Callback when a message is received from the broker
+def on_message(client, userdata, msg):
+    print(f"Received message: {msg.payload.decode()} on topic {msg.topic}")
 
-if __name__ == '__main__':
-    formatter = "[%(asctime)s] :: %(levelname)s :: %(name)s :: %(message)s"
-    logging.basicConfig(level=logging.INFO, format=formatter)
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(start_broker())
-    loop.run_forever()
+    if (msg.topic == "StartUp"):
+        client.publish("Gains", json.dumps(STARTING_GAINS))
+
+# Create an MQTT client instance
+client = mqtt.Client()
+
+# Attach the callback functions
+client.on_connect = handle_connect
+client.on_message = on_message
+
+# Connect to the broker
+client.connect(BROKER, PORT, keepalive=60)
+
+# Start a loop to process network events
+client.loop_start()
+
+# Keep the script running
+try:
+    while True:
+        arr = input("Input k_p k_i k_d : ").split()
+        payload = { "k_p" : int(arr[0]), "k_i" : int(arr[1]), "k_d" : int(arr[2])}
+        client.publish("Gains", json.dumps(payload))
+except KeyboardInterrupt:
+    print("Disconnecting from broker...")
+    client.disconnect()
+    client.loop_stop()
