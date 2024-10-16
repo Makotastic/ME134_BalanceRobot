@@ -3,6 +3,7 @@
 #include "TiltController.h"
 
 const int PWM_MAX_VAL = 255;
+const int maxIntegral = 2000;
 float k_p;
 float k_d;
 float k_i;
@@ -11,21 +12,28 @@ int pastTime;
 
 void SetGains(float kp, float ki, float kd) {
     k_p = kp;
-    k_d = ki;
-    k_i = kd;
+    k_i = ki;
+    k_d = kd;
 }
 
-int CalcMotorPower(float target_angle, float measured_angle, float angluar_velocity) {
+float GetErrorSum() {
+    return sumError;
+}
+
+int CalcMotorPower(float target_angle, float measured_angle, float angular_velocity) {
     int currentTime = micros();
+    float dt = (currentTime - pastTime) / 1000000.0;
+
     float error = (target_angle - measured_angle);
-    sumError += error * (currentTime - pastTime);
-    float PWM = (k_p * error) + (k_i * sumError) + (k_d * angluar_velocity);
-    if (PWM > PWM_MAX_VAL) {
-        PWM = 255;
-    }
-    if (PWM < 0) {
-        PWM  = 0;
-    }
+    sumError += error * dt;
+
+    if (sumError > maxIntegral) sumError = maxIntegral;
+    if (sumError < -maxIntegral) sumError = -maxIntegral;
+
+    float PWM = (k_p * error) + (k_i * sumError) + (k_d * angular_velocity);
+
+    PWM = constrain(PWM, 0, PWM_MAX_VAL);
+    
     pastTime = currentTime;
     return round(PWM);
 }

@@ -1,5 +1,5 @@
-#ifndef MPU9250_MS5637_H
-#define MPU9250_MS5637_H
+#ifndef IMU9250_H
+#define IMU9250_H
 
 #include "Wire.h"
 #include <Arduino.h>
@@ -32,26 +32,6 @@
 #define MS5637_CONVERT_D1 0x40
 #define MS5637_CONVERT_D2 0x50
 #define MS5637_ADC_READ   0x00
-
-// Enums for sensor configurations
-enum Ascale {
-  AFS_2G = 0,
-  AFS_4G,
-  AFS_8G,
-  AFS_16G
-};
-
-enum Gscale {
-  GFS_250DPS = 0,
-  GFS_500DPS,
-  GFS_1000DPS,
-  GFS_2000DPS
-};
-
-enum Mscale {
-  MFS_14BITS = 0, // 0.6 mG per LSB
-  MFS_16BITS      // 0.15 mG per LSB
-};
 
 // Function declarations
 void MadgwickQuaternionUpdate(float ax, float ay, float az, float gx, float gy, float gz, float mx, float my, float mz);
@@ -90,8 +70,6 @@ extern float pitch, yaw, roll;
 extern float temperature;
 extern float q[4];
 extern int intPin;
-extern bool newData;
 extern uint16_t Pcal[8];
-extern float beta;
 
 #endif // MPU9250_MS5637_H
