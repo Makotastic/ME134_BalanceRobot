@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <math.h>
+#include "TiltController.h"
 
 const int PWM_MAX_VAL = 255;
 float k_p;
