@@ -5,7 +5,7 @@ import json
 BROKER = "127.0.0.1"  # Public MQTT broker for testing
 PORT = 1883  # Standard port for unencrypted MQTT
 
-STARTING_GAINS = {  "k_p" : 0.5,
+STARTING_GAINS = {  "k_p" : 2.8,
                     "k_i" : 0,
                     "k_d" : 0 }
 

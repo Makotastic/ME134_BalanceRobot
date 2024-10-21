@@ -21,7 +21,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
     Serial.println();  // New line after printing the message
 
-    if (strcmp(topic,"Gains")) {
+    if (strcmp(topic,"Gains") == 0) {
         JsonDocument doc;
         DeserializationError error = deserializeJson(doc, payload);
         if (error) {
@@ -30,10 +30,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
             return;
         }
 
-        SetGains(doc["k_p"], doc["k_i"], doc["k_d"]); 
+        SetGains(doc["k_p"], doc["k_i"], doc["k_d"]);
+        Serial.println("changing Gains");
     }
 
-    if (strcmp(topic,"TargetPosition")) {
+    if (strcmp(topic,"TargetPosition") == 0) {
         JsonDocument doc;
         DeserializationError error = deserializeJson(doc, payload);
         if (error) {
