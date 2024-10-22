@@ -1,20 +1,23 @@
 #include <Arduino.h>
 #include <math.h>
 #include <MPU9250_RegisterMap.h>
+#include <IMU9250_v2.h>
 #include <SparkFunMPU9250-DMP.h> // Include SparkFun MPU-9250-DMP library
 #include <Wire.h> // Depending on your Arduino version, you may need to include Wire.h
 
 const int intPin = 27;
 MPU9250_DMP imu; // Create an instance of the MPU9250_DMP class
 bool dataReady = false;
-int count = 0;
-unsigned long pastTime = micros();
+//int count = 0;
+//unsigned long pastTime = micros();
+
+float roll;
 
 void sensorInterupt() {
     dataReady = true;
 }
 
-void setup() {
+void IMU9250setup() {
     Serial.begin(115200);
     Serial.println("Setup");
     if (imu.begin()) {
@@ -46,42 +49,44 @@ void setup() {
     Serial.println("Setup Done"); 
 }
 
-void loop() { //make return bool
+bool IMU9250loop() { //make return bool
     if ( dataReady )
     {
         // Use dmpUpdateFifo to update the ax, gx, qx, etc. values
         if ( imu.dmpUpdateFifo() == INV_SUCCESS )
         {
             imu.computeEulerAngles();
-            if (count % 200 == 0) {
-                // Serial.print("w x y z: ");
-                // Serial.print(imu.qw);
-                // Serial.print(" ");
-                // Serial.print(imu.qx);
-                // Serial.print(" ");
-                // Serial.print(imu.qy);
-                // Serial.print(" ");
-                Serial.println(imu.qz);
-                Serial.print("gx gy gz: ");
-                Serial.print(imu.gx);
-                Serial.print(" ");
-                Serial.print(imu.gy);
-                Serial.print(" ");
-                Serial.println(imu.gz);
-                Serial.print("Pitch Yaw Roll: ");
-                Serial.print(imu.pitch);
-                Serial.print(" ");
-                Serial.print(imu.yaw);
-                Serial.print(" ");
-                Serial.println(imu.roll);
-            }
-            count++;
+            roll = imu.roll;
+            return true;
+            // if (count % 200 == 0) {
+            //     // Serial.print("w x y z: ");
+            //     // Serial.print(imu.qw);
+            //     // Serial.print(" ");
+            //     // Serial.print(imu.qx);
+            //     // Serial.print(" ");
+            //     // Serial.print(imu.qy);
+            //     // Serial.print(" ");
+            //     // Serial.println(imu.qz);
+            //     Serial.print("gx gy gz: ");
+            //     Serial.print(imu.gx);
+            //     Serial.print(" ");
+            //     Serial.print(imu.gy);
+            //     Serial.print(" ");
+            //     Serial.println(imu.gz);
+            //     Serial.print("Pitch Yaw Roll: ");
+            //     Serial.print(imu.pitch);
+            //     Serial.print(" ");
+            //     Serial.print(imu.yaw);
+            //     Serial.print(" ");
+            //     Serial.println(imu.roll);
+            // }
+            // count++;
 
-            if (micros() - pastTime > 1000000) {
-                Serial.println(count);
-                pastTime = micros();
-                count = 0;
-            }
+            // if (micros() - pastTime > 1000000) {
+            //     Serial.println(count);
+            //     pastTime = micros();
+            //     count = 0;
+            // }
             // The following variables will have data from the top of the FIFO:
             // imu.ax, imu.ay, imu.az, -- Accelerometer
             // imu.gx, imu.gy, imu.gz -- calibrated gyroscope
@@ -89,4 +94,5 @@ void loop() { //make return bool
         }
         dataReady = false;
     }
+    return false;
 }
