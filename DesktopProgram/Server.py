@@ -5,7 +5,7 @@ import json
 BROKER = "127.0.0.1"  # Public MQTT broker for testing
 PORT = 1883  # Standard port for unencrypted MQTT
 
-STARTING_GAINS = {  "k_p" : 2.8,
+STARTING_GAINS = {  "k_p" : 0,
                     "k_i" : 0,
                     "k_d" : 0 }
 
@@ -41,7 +41,7 @@ client.loop_start()
 try:
     while True:
         arr = input("Input k_p k_i k_d : ").split()
-        payload = { "k_p" : int(arr[0]), "k_i" : int(arr[1]), "k_d" : int(arr[2])}
+        payload = { "k_p" : float(arr[0]), "k_i" : float(arr[1]), "k_d" : float(arr[2])}
         client.publish("Gains", json.dumps(payload))
 except KeyboardInterrupt:
     print("Disconnecting from broker...")

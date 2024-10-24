@@ -8,18 +8,20 @@
 const int intPin = 27;
 MPU9250_DMP imu; // Create an instance of the MPU9250_DMP class
 bool dataReady = false;
-//int count = 0;
+int countP = 0;
 //unsigned long pastTime = micros();
 
-float roll;
+float pitch;
 
 void sensorInterupt() {
     dataReady = true;
 }
 
 void IMU9250setup() {
-    Serial.begin(115200);
-    Serial.println("Setup");
+
+    pinMode(intPin, INPUT);
+    attachInterrupt(digitalPinToInterrupt(intPin), sensorInterupt, RISING);
+
     if (imu.begin()) {
         Serial.println("FAILED MPU9250");
     }
@@ -38,13 +40,10 @@ void IMU9250setup() {
     // // The sample rate of the accel/gyro can be set using
     // // setSampleRate. Acceptable values range from 4Hz to 1kHz
     //imu.setSampleRate(1000);
-
-    pinMode(intPin, INPUT);
-    attachInterrupt(digitalPinToInterrupt(intPin), sensorInterupt, RISING);
     
     imu.enableInterrupt(1);
     imu.setIntLevel(INT_ACTIVE_HIGH);
-    imu.setIntLatched(INT_LATCHED);
+    imu.setIntLatched(INT_50US_PULSE);
 
     Serial.println("Setup Done"); 
 }
@@ -55,32 +54,33 @@ bool IMU9250loop() { //make return bool
         // Use dmpUpdateFifo to update the ax, gx, qx, etc. values
         if ( imu.dmpUpdateFifo() == INV_SUCCESS )
         {
+            //Serial.println("dataReady");
             imu.computeEulerAngles();
-            roll = imu.roll;
-            return true;
-            // if (count % 200 == 0) {
-            //     // Serial.print("w x y z: ");
-            //     // Serial.print(imu.qw);
-            //     // Serial.print(" ");
-            //     // Serial.print(imu.qx);
-            //     // Serial.print(" ");
-            //     // Serial.print(imu.qy);
-            //     // Serial.print(" ");
-            //     // Serial.println(imu.qz);
-            //     Serial.print("gx gy gz: ");
-            //     Serial.print(imu.gx);
-            //     Serial.print(" ");
-            //     Serial.print(imu.gy);
-            //     Serial.print(" ");
-            //     Serial.println(imu.gz);
-            //     Serial.print("Pitch Yaw Roll: ");
-            //     Serial.print(imu.pitch);
-            //     Serial.print(" ");
-            //     Serial.print(imu.yaw);
-            //     Serial.print(" ");
-            //     Serial.println(imu.roll);
-            // }
-            // count++;
+            pitch = imu.pitch;
+            if (countP % 200 == 0) {
+                // Serial.print("w x y z: ");
+                // Serial.print(imu.qw);
+                // Serial.print(" ");
+                // Serial.print(imu.qx);
+                // Serial.print(" ");
+                // Serial.print(imu.qy);
+                // Serial.print(" ");
+                // Serial.println(imu.qz);
+                // Serial.print("gx gy gz: ");
+                // Serial.print(imu.gx);
+                // Serial.print(" ");
+                // Serial.print(imu.gy);
+                // Serial.print(" ");
+                // Serial.println(imu.gz);
+                // Serial.print("Pitch Yaw Roll: ");
+                // Serial.print(imu.pitch);
+                // Serial.print(" ");
+                // Serial.print(imu.yaw);
+                // Serial.print(" ");
+                // Serial.println(imu.roll);
+            }
+            countP++;
+            
 
             // if (micros() - pastTime > 1000000) {
             //     Serial.println(count);
@@ -93,6 +93,7 @@ bool IMU9250loop() { //make return bool
             // and imu.qw, imu.qx, imu.qy, and imu.qz -- quaternions
         }
         dataReady = false;
+        return true;
     }
     return false;
 }

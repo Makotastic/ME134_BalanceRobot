@@ -88,9 +88,11 @@ void IMU6050setup() {
   delay(10);
   /*Initialize device*/
   Serial.println(F("Initializing I2C devices..."));
-  mpu.initialize();
   pinMode(INTERRUPT_PIN, INPUT);
+  attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), DMPDataReady, RISING);
 
+  mpu.initialize();
+  
   /*Verify connection*/
   Serial.println(F("Testing MPU6050 connection..."));
   if(mpu.testConnection() == false){
@@ -132,8 +134,9 @@ void IMU6050setup() {
     Serial.print(F("Enabling interrupt detection (Arduino external interrupt "));
     Serial.print(digitalPinToInterrupt(INTERRUPT_PIN));
     Serial.println(F(")..."));
-    attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), DMPDataReady, RISING);
+    
     mpu.setIntEnabled(0x1);
+    mpu.setInterruptLatch(0);
     mpu.setInterruptLatchClear(true);
     MPUIntStatus = mpu.getIntStatus();
 
@@ -154,7 +157,7 @@ bool IMU6050loop() {
   /* Read a packet from FIFO */
   if (MPUInterrupt) { // Get the Latest packet 
       mpu.getRotation(&gx, &gy, &gz);
-      rollRate = gy/131;
+      rollRate = (float)gy/131;
       return true;
   //     if (micros() - prevtime > 1000000) {
   //     Serial.print("gx gy gz: ");

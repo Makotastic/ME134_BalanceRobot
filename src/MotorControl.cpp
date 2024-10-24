@@ -1,6 +1,6 @@
 #include <Arduino.h>
 int ENA = 18;  // Enable pin for motor (controls speed via PWM)
-int IN1 = 23;  // Input pin 1 (controls direction)
+int IN1 = 5;  // Input pin 1 (controls direction)
 int IN2 = 19;  // Input pin 2 (controls direction)
 int IN3 = 17;
 int IN4 = 16;

@@ -77,3 +77,7 @@ void sendIntegralSum() {
 void MQTTLoop() {
     client.loop();
 }
+
+void logs(char* data) {
+    client.publish("logs", data);
+}

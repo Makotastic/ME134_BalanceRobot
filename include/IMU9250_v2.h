@@ -7,7 +7,7 @@
 #include <SparkFunMPU9250-DMP.h> // Include SparkFun MPU-9250-DMP library
 #include <Wire.h> // Depending on your Arduino version, you may need to include Wire.h
 
-extern float roll;
+extern float pitch;
 
 void IMU9250setup();
 bool IMU9250loop();
