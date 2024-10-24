@@ -4,8 +4,8 @@
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
 
-extern int16_t gy;
-extern float rollRate;
+extern float pitchV2;
+extern float pitchRateV2;
 
 void IMU6050setup();
 

@@ -70,11 +70,21 @@ bool blinkState;
 bool DMPReady = false;  // Set true if DMP init was successful
 uint8_t MPUIntStatus;   // Holds actual interrupt status byte from MPU
 uint8_t devStatus;      // Return status after each device operation (0 = success, !0 = error)
+uint16_t packetSize;    // Expected DMP packet size (default is 42 bytes)
+uint8_t FIFOBuffer[64]; // FIFO storage buffer
 
-int16_t gx, gy, gz;
+/*---Orientation/Motion Variables---*/ 
+Quaternion q;           // [w, x, y, z]         Quaternion container
+VectorInt16 aa;         // [x, y, z]            Accel sensor measurements
+VectorInt16 gy;         // [x, y, z]            Gyro sensor measurements
+VectorInt16 aaReal;     // [x, y, z]            Gravity-free accel sensor measurements
+VectorInt16 aaWorld;    // [x, y, z]            World-frame accel sensor measurements
+VectorFloat gravity;    // [x, y, z]            Gravity vector
+float euler[3];         // [psi, theta, phi]    Euler angle container
+float ypr[3];           // [yaw, pitch, roll]   Yaw/Pitch/Roll container and gravity vector
 
-float rollRate = 0;
-
+float pitchRateV2 = 0;
+float pitchV2 = 0;
 //unsigned long prevtime = micros();
 //int count = 0;
 
@@ -85,6 +95,8 @@ void DMPDataReady() {
 }
 
 void IMU6050setup() {
+  Wire.begin();
+  Wire.setClock(300000);
   delay(10);
   /*Initialize device*/
   Serial.println(F("Initializing I2C devices..."));
@@ -125,24 +137,19 @@ void IMU6050setup() {
     Serial.println("These are the Active offsets: ");
     mpu.PrintActiveOffsets();
     Serial.println(F("Enabling DMP..."));   //Turning ON DMP
-    mpu.setDMPEnabled(false);
-    mpu.setFIFOEnabled(false);
-    mpu.setRate(0);
-    mpu.setDLPFMode(MPU6050_DLPF_BW_42);
+    mpu.setDMPEnabled(true);
 
     /*Enable Arduino interrupt detection*/
     Serial.print(F("Enabling interrupt detection (Arduino external interrupt "));
     Serial.print(digitalPinToInterrupt(INTERRUPT_PIN));
     Serial.println(F(")..."));
     
-    mpu.setIntEnabled(0x1);
+    mpu.setIntEnabled(MPU6050_INTERRUPT_DMP_INT_BIT);
     mpu.setInterruptLatch(0);
-    mpu.setInterruptLatchClear(true);
-    MPUIntStatus = mpu.getIntStatus();
 
-    /* Set the DMP Ready flag so the main loop() function knows it is okay to use it */
     Serial.println(F("DMP ready! Waiting for first interrupt..."));
     DMPReady = true;
+    packetSize = mpu.dmpGetFIFOPacketSize(); //Get expected DMP packet size for later comparison
   } 
   else {
     Serial.print(F("DMP Initialization failed (code ")); //Print the error code
@@ -155,9 +162,12 @@ void IMU6050setup() {
 
 bool IMU6050loop() {
   /* Read a packet from FIFO */
-  if (MPUInterrupt) { // Get the Latest packet 
-      mpu.getRotation(&gx, &gy, &gz);
-      rollRate = (float)gy/131;
+  if (MPUInterrupt && mpu.dmpGetCurrentFIFOPacket(FIFOBuffer)) {
+      mpu.dmpGetQuaternion(&q, FIFOBuffer);
+      mpu.dmpGetGravity(&gravity, &q); // Get the Latest packet
+      mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+      pitchV2 = ypr[1] * (float)180/M_PI;
+      pitchRateV2 = (float)mpu.getRotationY()/131;
       return true;
   //     if (micros() - prevtime > 1000000) {
   //     Serial.print("gx gy gz: ");

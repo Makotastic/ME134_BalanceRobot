@@ -44,6 +44,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
         }
         //setTarget
     }
+    if (strcmp(topic,"resetI") == 0) {
+        resetI();
+        Serial.println("ResetI");
+    }
 }
 
 WiFiClient Wifi_Client;
@@ -64,6 +68,7 @@ void MQTTSetup() {
         Serial.println("MQTT CONNECTED");
         client.subscribe("Gains");
         client.subscribe("TargetPosition");
+        client.subscribe("resetI");
         client.publish("StartUp","POWERUP");
     }
 }

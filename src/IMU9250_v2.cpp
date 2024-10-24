@@ -12,6 +12,7 @@ int countP = 0;
 //unsigned long pastTime = micros();
 
 float pitch;
+float pitchRate;
 
 void sensorInterupt() {
     dataReady = true;
@@ -57,6 +58,7 @@ bool IMU9250loop() { //make return bool
             //Serial.println("dataReady");
             imu.computeEulerAngles();
             pitch = imu.pitch;
+            pitchRate = (float)imu.gy/131;
             if (countP % 200 == 0) {
                 // Serial.print("w x y z: ");
                 // Serial.print(imu.qw);

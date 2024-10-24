@@ -8,6 +8,7 @@
 #include <Wire.h> // Depending on your Arduino version, you may need to include Wire.h
 
 extern float pitch;
+extern float pitchRate;
 
 void IMU9250setup();
 bool IMU9250loop();

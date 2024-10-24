@@ -10,7 +10,7 @@ float k_i = 0;
 float sumError;
 int pastTime;
 
-//need Negative K_d
+//k_d negative
 
 void SetGains(float kp, float ki, float kd) {
     k_p = kp;
@@ -28,19 +28,19 @@ float GetErrorSum() {
 }
 
 int CalcMotorPower(float target_angle, float measured_angle, float angular_velocity) {
-    float mNormAngle;
-    if (measured_angle > 180) {
-        mNormAngle = measured_angle - 360;
-    }
-    else {
-        mNormAngle = measured_angle;
-    }
+    float mNormAngle = measured_angle;
+    // if (measured_angle > 180) {
+    //     mNormAngle = measured_angle - 360;
+    // }
+    // else {
+    //     mNormAngle = measured_angle;
+    // }
 
-    //int currentTime = micros();
-    //float dt = (currentTime - pastTime) / 1000000.0;
+    int currentTime = micros();
+    float dt = (currentTime - pastTime) / 1000000.0;
 
     float error = (target_angle - mNormAngle);
-    //sumError += error * dt;
+    sumError += error * dt;
 
     //if (sumError > maxIntegral) sumError = maxIntegral;
     //if (sumError < -maxIntegral) sumError = -maxIntegral;
@@ -49,6 +49,10 @@ int CalcMotorPower(float target_angle, float measured_angle, float angular_veloc
 
     PWM = constrain(PWM, -1 * PWM_MAX_VAL, PWM_MAX_VAL);
     
-    //pastTime = currentTime;
+    pastTime = currentTime;
     return round(PWM);
+}
+
+void resetI() {
+    sumError = 0;
 }
