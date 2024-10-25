@@ -14,7 +14,7 @@ STARTING_GAINS = {  "k_p" : 0,
 def handle_connect(client, userdata, flags, reason_code, properties=None):
     print(f"Connected with reason code: {reason_code}")
     client.subscribe("StartUp")
-    client.subscribe("Gains")
+    client.subscribe("TiltGains")
     client.subscribe("ErrorSum")
 
 # Callback when a message is received from the broker
@@ -22,7 +22,7 @@ def on_message(client, userdata, msg):
     print(f"Received message: {msg.payload.decode()} on topic {msg.topic}")
 
     if (msg.topic == "StartUp"):
-        client.publish("Gains", json.dumps(STARTING_GAINS))
+        client.publish("TiltGains", json.dumps(STARTING_GAINS))
 
 # Create an MQTT client instance
 client = mqtt.Client()
@@ -42,7 +42,7 @@ try:
     while True:
         arr = input("Input k_p k_i k_d : ").split()
         payload = { "k_p" : float(arr[0]), "k_i" : float(arr[1]), "k_d" : float(arr[2])}
-        client.publish("Gains", json.dumps(payload))
+        client.publish("TiltGains", json.dumps(payload))
 except KeyboardInterrupt:
     print("Disconnecting from broker...")
     client.disconnect()

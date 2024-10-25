@@ -4,6 +4,7 @@
 #include <ArduinoJson.h>
 #include <WiFi.h>
 #include "wifiMQTT.h"
+#include <VelocityController.h>
 
 const char* ssid = "Tufts_Robot";
 const char* pass = "";
@@ -21,7 +22,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
     Serial.println();  // New line after printing the message
 
-    if (strcmp(topic,"Gains") == 0) {
+    if (strcmp(topic,"TiltGains") == 0) {
         JsonDocument doc;
         DeserializationError error = deserializeJson(doc, payload);
         if (error) {
@@ -34,7 +35,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
         Serial.println("changing Gains");
     }
 
-    if (strcmp(topic,"TargetPosition") == 0) {
+    if (strcmp(topic,"VelGains") == 0) {
         JsonDocument doc;
         DeserializationError error = deserializeJson(doc, payload);
         if (error) {
@@ -42,7 +43,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
             Serial.println(error.f_str());
             return;
         }
-        //setTarget
+        SetVelGains(doc["k_p"], doc["k_i"], doc["k_d"]);
+        Serial.println("changing Gains");
     }
     if (strcmp(topic,"resetI") == 0) {
         resetI();
@@ -66,7 +68,8 @@ void MQTTSetup() {
 
     if (client.connect("ESP32Client", "testuser", "testpass")) {
         Serial.println("MQTT CONNECTED");
-        client.subscribe("Gains");
+        client.subscribe("TiltGains");
+        client.subscribe("VelGains");
         client.subscribe("TargetPosition");
         client.subscribe("resetI");
         client.publish("StartUp","POWERUP");

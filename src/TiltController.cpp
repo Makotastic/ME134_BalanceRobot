@@ -4,6 +4,7 @@
 
 const int PWM_MAX_VAL = 255;
 const int maxIntegral = 2000;
+const int MIN_PWM = 15;
 float k_p = 0;
 float k_d = 0;
 float k_i = 0;
@@ -47,7 +48,12 @@ int CalcMotorPower(float target_angle, float measured_angle, float angular_veloc
 
     float PWM = (k_p * error) + (k_i * sumError) + (k_d * angular_velocity);
 
-    PWM = constrain(PWM, -1 * PWM_MAX_VAL, PWM_MAX_VAL);
+    if (PWM > 0) {
+        PWM = constrain(PWM, MIN_PWM, PWM_MAX_VAL);
+    }
+    else {
+        PWM = constrain(PWM, -1 * PWM_MAX_VAL, -1 * MIN_PWM);
+    }
     
     pastTime = currentTime;
     return round(PWM);
